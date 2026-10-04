@@ -55,6 +55,20 @@ li.cand{background:#a78bfa1f;border-color:var(--cand)}
 .chip{display:inline-block;margin:0 6px 6px 0;padding:3px 12px;border-radius:999px;border:2px solid;font-weight:700;transition:.3s}
 .note{margin:18px 0 0;font-size:.82rem;color:var(--mu)}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.cxw{margin-top:22px}
+.cxw h2{font-size:1.2rem;margin:0 0 4px}
+.cxw>p{color:var(--mu);margin:0 0 14px}
+.cxg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.cxg{grid-template-columns:1fr}}
+.cx{background:var(--pan);border:1px solid var(--ln);border-radius:16px;padding:16px;opacity:.75;transition:.3s}
+.cx.active{opacity:1;border-color:var(--tree);box-shadow:inset 0 0 0 1px var(--tree)}
+.cx h3{margin:0 0 12px}
+.big{display:flex;gap:10px;margin-bottom:12px}
+.big div{flex:1;background:#0a0f1f;border:1px solid var(--ln);border-radius:10px;padding:8px 12px}
+.big span{display:block;font-size:.75rem;color:var(--mu)}
+.big b{font-size:1.15rem}
+.cx p{margin:0 0 10px;font-size:.92rem;color:#c9d2f5}
+.cx p b{color:var(--tx)}
 /* svg */
 .e{stroke:#33427a;stroke-width:2.5;stroke-linecap:round;transition:stroke .4s,stroke-width .4s,opacity .4s}
 .e.cand{stroke:var(--cand);stroke-width:3.5}
@@ -97,6 +111,27 @@ li.cand{background:#a78bfa1f;border-color:var(--cand)}
 <aside class="side"><div id="side"></div>
 <p class="note"><span class="dot" style="background:var(--tree)"></span>In the tree <span class="dot" style="background:var(--rej)"></span>Rejected <span class="dot" style="background:var(--cur)"></span>Examining <span class="dot" style="background:var(--cand)"></span>Prim's choices<br>Space plays or pauses. Arrow keys step.</p></aside>
 </div>
+<section class="cxw" aria-label="Complexity analysis">
+<h2>Time and space complexity</h2>
+<p>V is the number of vertices and n is the number of edges. This demo graph has V = 7 and n = 11. The card for the algorithm you are watching is highlighted.</p>
+<div class="cxg">
+<article class="cx active" id="cxk">
+<h3>Kruskal's algorithm</h3>
+<div class="big"><div><span>Time</span><b>O(n log n)</b></div><div><span>Space</span><b>O(V + n)</b></div></div>
+<p><b>Time.</b> Sorting the n edges is the expensive part and costs O(n log n). After that, each edge needs one find and at most one union on the disjoint sets. With path compression and union by rank, those operations are nearly constant time, so the loop adds only about O(n &alpha;(V)). Sorting dominates. Because n &le; V<sup>2</sup>, log n is at most 2 log V, so O(n log n) is the same as O(n log V).</p>
+<p><b>Space.</b> It stores the edge list (n) plus the parent and rank arrays for the disjoint sets (V).</p>
+<p><b>In this demo.</b> All 11 edges are sorted, then each is examined once. Six are accepted (V &minus; 1) and five are rejected for forming a cycle.</p>
+</article>
+<article class="cx" id="cxp">
+<h3>Prim's algorithm</h3>
+<div class="big"><div><span>Time (binary heap)</span><b>O(n log V)</b></div><div><span>Space</span><b>O(V + n)</b></div></div>
+<p><b>Time.</b> Every vertex joins the tree once, and every edge is looked at at most twice, once from each end. Each push or pop on the priority queue costs O(log V), which gives O(n log V). With a plain array instead of a heap, the cost is O(V<sup>2</sup>), which is better for dense graphs. A Fibonacci heap improves it to O(n + V log V).</p>
+<p><b>Space.</b> An adjacency list takes O(V + n), and the heap and key arrays add O(V). With an adjacency matrix the space is O(V<sup>2</sup>).</p>
+<p><b>In this demo.</b> There are 6 rounds (V &minus; 1). Each round picks the cheapest edge leaving the tree and pulls in one new vertex.</p>
+</article>
+</div>
+<p style="margin-top:14px">Which one should you use? For sparse graphs (n close to V), Kruskal is simple and fast. For dense graphs (n close to V<sup>2</sup>), Prim with an array is hard to beat. Both always give a tree of the same total weight, 39 here, though the exact edges can differ when weights tie.</p>
+</section>
 </div>
 <script>
 const V=['A','B','C','D','E','F','G'];
@@ -168,7 +203,8 @@ function apply(){
   $('stp').textContent=`Step ${idx} / ${steps.length-1}`;
   const sc=$('scr');sc.max=steps.length-1;sc.value=idx;sc.style.setProperty('--p',(idx/(steps.length-1)*100)+'%');
   $('back').disabled=idx===0&&!x;$('next').disabled=idx===steps.length-1;
-  $('badge').innerHTML=k?'<b>Kruskal</b> &middot; sort edges, avoid cycles &middot; O(E log E)':'<b>Prim</b> &middot; grow from a start vertex &middot; O(E log V)';
+  $('badge').innerHTML=k?'<b>Kruskal</b> &middot; sort edges, avoid cycles &middot; O(n log n)':'<b>Prim</b> &middot; grow from a start vertex &middot; O(n log V)';
+  $('cxk').classList.toggle('active',k);$('cxp').classList.toggle('active',!k);
   /* side panel */
   let h='';
   if(k){
